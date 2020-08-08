@@ -27,15 +27,24 @@ class BoardsController < ApplicationController
   end
 
   def edit
+    @board.attributes = flash[:board] if flash[:board]
   end
 
   def update
-    @board.update(board_params)
-    redirect_to @board
+    @board = Board.find(params[:id])
+    if @board.update(board_params)
+      flash[:notice] = "掲示板を編集しました"
+      redirect_to @board
+    else
+      redirect_back fallback_location: edit_board_path, flash: {
+      board: @board,
+      error_messages: @board.errors.full_messages }
+    end
   end
 
   def destroy
-    @board.delete
+    @board = Board.find(params[:id])
+    @board.destroy
     flash[:notice] = "「#{@board.title}」の掲示板を削除しました"
     redirect_to boards_path
   end
